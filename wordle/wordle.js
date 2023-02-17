@@ -54,11 +54,37 @@ const selectWord = async () => {
     let word = dictionary[Math.floor(Math.random() * dictionary.length)]
     return word
 }
-
-
 currentWord = selectWord()
 let guessesRemaining = 4
 let nextLetter = 0
+
+//add start over button
+document.getElementById("startOver").addEventListener("click", () => {
+    //reset the board
+    let boxes = document.getElementsByClassName("box")
+    for (let i = 0; i < boxes.length; i++) {
+        boxes[i].innerHTML = ""
+        boxes[i].classList.remove("bg-success")
+        boxes[i].classList.remove("bg-secondary")
+        boxes[i].classList.remove("text-white")
+        boxes[i].classList.remove("border-primary")
+    }
+    //hide the hint using bootstrap
+    document.getElementById('AlertPlaceholder').innerHTML = ""
+    
+    //reset the nextLetter variable
+    nextLetter = 0
+    //reset the guesses remaining
+    guessesRemaining = 4
+    //reset the current word
+    currentWord = selectWord()
+    //reset the border on the first box
+    boxes[0].classList.add("border-primary")
+
+
+})
+
+
 
 
 document.addEventListener("keyup", (e) => {
@@ -174,7 +200,9 @@ const checkGuess = async () => {
     guessesRemaining--
     // if the user has no guesses remaining, end the game
     if (guessesRemaining === 0) {
-        console.log("you lose")
+        let Alert = `<div class="alert alert-danger fade show text-center" role="alert"> You have no guesses remaining. The word was <span class="fw-bold">` + word.toUpperCase() + `</span></div>`
+        // insert the alert into the placeholder div
+        document.getElementById('AlertPlaceholder').innerHTML = Alert
         return
     }
     // if the user has guesses remaining, highlight the first box of the next row
@@ -190,5 +218,5 @@ document.getElementById('hintButton').addEventListener('click', async () => {
     // create a bootstrap alert with the hint
     let hintAlert = `<div class="alert alert-warning fade show text-center" role="alert">` + hint
     // insert the alert into the placeholder div
-    document.getElementById('hintAlertPlaceholder').innerHTML = hintAlert
+    document.getElementById('AlertPlaceholder').innerHTML = hintAlert
 })

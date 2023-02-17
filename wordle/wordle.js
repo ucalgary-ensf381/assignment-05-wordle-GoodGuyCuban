@@ -165,10 +165,8 @@ const checkGuess = async () => {
     }
     //select just the 'word' part of the object
     let dictionary = await currentWord
-    console.log(dictionary)
     let word = dictionary["word"]
     word = word.toLowerCase()
-    console.log(word)
 
     let row = document.getElementsByClassName("row")[4 - guessesRemaining]
     let boxes = row.getElementsByClassName("box")

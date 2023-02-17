@@ -36,7 +36,6 @@ const initBoard = () => {
             box.classList.add('border');
             col.appendChild(box);
             row.appendChild(col);
-            console.log(box);
             
         }
         board.appendChild(row);
@@ -60,15 +59,16 @@ let nextLetter = 0
 
 //add start over button
 document.getElementById("startOver").addEventListener("click", () => {
-    //reset the board
-    let boxes = document.getElementsByClassName("box")
-    for (let i = 0; i < boxes.length; i++) {
-        boxes[i].innerHTML = ""
-        boxes[i].classList.remove("bg-success")
-        boxes[i].classList.remove("bg-secondary")
-        boxes[i].classList.remove("text-white")
-        boxes[i].classList.remove("border-primary")
+    //reset the board by calling the initBoard function if the win-image exists, remove it
+    if (document.getElementById("win-image")) {
+        document.getElementById("win-image").remove()
     }
+    //remove the old board if it exists remove the elements inside the board not the board itself
+    let board = document.getElementById("board")
+    while (board.firstChild) {
+        board.removeChild(board.firstChild)
+    }
+    initBoard()
     //hide the hint using bootstrap
     document.getElementById('AlertPlaceholder').innerHTML = ""
     
@@ -78,8 +78,7 @@ document.getElementById("startOver").addEventListener("click", () => {
     guessesRemaining = 4
     //reset the current word
     currentWord = selectWord()
-    //reset the border on the first box
-    boxes[0].classList.add("border-primary")
+    
 
 
 })
@@ -174,22 +173,73 @@ const checkGuess = async () => {
     let row = document.getElementsByClassName("row")[4 - guessesRemaining]
     let boxes = row.getElementsByClassName("box")
     let guess = ""
-
-    // iterate through each box and check if the letter is correct
+    //crate an alpabet dictionary to mark how many times each letter appears in the word, key is the letter, value is the number of times it appears
+    let alphabet = {}
+    for (let i = 0; i < word.length; i++) {
+        let letter = word[i]
+        if (alphabet[letter]) {
+            alphabet[letter] += 1;
+        } else {
+            alphabet[letter] = 1;
+        }
+    }
+    
+    let correctGuesses = {}
+    for (let i = 0; i < word.length; i++) {
+        let letter = word[i]
+        // default the correct guesses to 0
+        correctGuesses[letter] = 0;
+    }
+    
     for (let i = 0; i < 4; i++) {
         let letter = boxes[i].innerHTML
         guess += letter
+        
         if (letter === word[i]) {
             boxes[i].classList.add("bg-success")
             boxes[i].classList.add("text-white")
+            //mark the letter as correct
+            if (correctGuesses[letter]) {
+                correctGuesses[letter] += 1;
+            }
+            else {
+                correctGuesses[letter] = 1;
+            }
+            
         } else {
             boxes[i].classList.add("bg-secondary")
             boxes[i].classList.add("text-white")
         }
     }
+    
+    for (let i = 0; i < 4; i++) {
+        let letter = boxes[i].innerHTML
+        if (word.includes(letter) && letter !== word[i]) {
+            if ((correctGuesses[letter]) < alphabet[letter]) {
+                boxes[i].classList.add("bg-warning")
+                boxes[i].classList.add("text-white")
+                correctGuesses[letter] += 1;
+            }
+        }
+    }
+   
+    
+    
+
     // if the guess is correct, end the game
     if (guess === word) {
-        console.log("you win")
+        //replace the game board with a win image
+        const winImage = document.createElement('img');
+        winImage.src = "assets/win.png";
+        winImage.classList.add('img-fluid');
+        winImage.classList.add('w-25');
+        winImage.classList.add('mx-auto');
+        winImage.classList.add('d-block');
+        document.getElementById('board').innerHTML = "";
+        document.getElementById('board').appendChild(winImage);
+        let Alert = `<div class="alert alert-success fade show text-center" role="alert"> You guessed the word <span class="fw-bold">` + word.toUpperCase() + `</span> correctly!</div>`
+        // insert the alert into the placeholder div
+        document.getElementById('AlertPlaceholder').innerHTML = Alert
         return
     }
     // if the guess is incorrect, remove the highlight from the boxes and reset the nextLetter variable
